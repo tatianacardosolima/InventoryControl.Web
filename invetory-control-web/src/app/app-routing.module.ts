@@ -6,8 +6,19 @@ const routes: Routes = [
   {
     path: '',
     component: HomeComponent
-  }
-
+  },
+  {
+    path: 'home',
+    component: HomeComponent,
+  },
+  {
+    path: 'dashboard',
+    loadChildren: () =>
+      import('./modules/dashboard/dashboard.module').then(
+        (m) => m.DashboardModule
+      ),
+    // canActivate: [AuthGuard]
+  },
 ];
 
 @NgModule({

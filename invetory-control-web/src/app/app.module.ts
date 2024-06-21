@@ -6,7 +6,7 @@ import { AppComponent } from './app.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import {HttpClientModule} from '@angular/common/http';
-import { DashboardComponent } from './modules/dashboard/pages/dashboard/dashboard.component';
+
 import { HomeComponent } from './modules/home/home/pages/home/home.component';
 
 
@@ -20,7 +20,6 @@ import { MessageService } from 'primeng/api';
 @NgModule({
   declarations: [
     AppComponent,
-    DashboardComponent,
     HomeComponent
   ],
   imports: [
