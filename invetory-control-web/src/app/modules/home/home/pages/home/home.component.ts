@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { MessageService } from 'primeng/api';
 import { SignupUserRequest } from 'src/app/models/interfaces/user/SignupUserRequest';
@@ -16,7 +17,8 @@ export class HomeComponent implements OnInit {
   constructor(private formBuilder: FormBuilder,
     private userService: UserService,
     private cookieService: CookieService,
-    private messageService: MessageService) {}
+    private messageService: MessageService,
+    private router: Router) {}
 
   ngOnInit(): void {
     this.loginCard = true;
@@ -44,6 +46,8 @@ export class HomeComponent implements OnInit {
             this.cookieService.set('USER_INFO', response?.token);
             this.loginForm.reset();
 
+            this.router.navigate(['/dashboard']);
+
             this.messageService.add({
               severity: 'success',
               summary: 'Sucesso',
@@ -67,7 +71,7 @@ export class HomeComponent implements OnInit {
   onSubmitSignupForm(): void {
     if (this.signupForm.value && this.signupForm.valid) {
       this.userService
-        .signupUser(this.signupForm.value)
+        .signupUser(this.signupForm.value as SignupUserRequest)
         .subscribe({
           next: (response) => {
             console.log(response);
