@@ -4,11 +4,14 @@ import { CookieService } from 'ngx-cookie-service';
 import { Observable, map } from 'rxjs';
 import { GetAllProductsResponse } from './../../models/interfaces/products/GetAllProductResponse';
 import { environment } from 'src/environments/environment';
+import { DeleteProductResponse } from 'src/app/models/interfaces/products/DeleteProductResponse';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ProductsService {
+
+
   private API_URL = environment.API_URL;
   private JWT_TOKEN = this.cookie.get('USER_INFO');
   private httpOptions = {
@@ -27,5 +30,17 @@ export class ProductsService {
         this.httpOptions
       )
       .pipe(map((product) => product.filter((data) => data?.amount > 0)));
+  }
+
+  deleteProduct(product_id: string) : Observable<DeleteProductResponse> {
+    return this.http.delete<DeleteProductResponse>(
+      `${this.API_URL}/products`,
+      {
+        ...this.httpOptions,
+        params: {
+          product_id: product_id,
+        },
+      }
+    );
   }
 }
