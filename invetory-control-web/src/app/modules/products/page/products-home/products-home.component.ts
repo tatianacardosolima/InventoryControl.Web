@@ -1,11 +1,14 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ProductsService } from '../../../../services/products/products.service';
 import { ProductsDataTransferService } from 'src/app/shared/services/products-data-transfer.service';
-import { GetAllProductsResponse } from 'src/app/models/interfaces/products/GetAllProductResponse';
+import { GetAllProductsResponse } from 'src/app/models/interfaces/products/response/GetAllProductResponse';
 import { EventAction } from 'src/app/models/interfaces/products/event/EventAction';
+import { DeleteProductAction } from 'src/app/models/interfaces/products/event/DeleteProductAction';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { ProductFormComponent } from '../../components/product-form/product-form.component';
 
 @Component({
   selector: 'app-products-home',
@@ -15,13 +18,16 @@ import { EventAction } from 'src/app/models/interfaces/products/event/EventActio
 export class ProductsHomeComponent implements OnInit, OnDestroy {
   private readonly destroy$: Subject<void> = new Subject();
   public productsDatas: Array<GetAllProductsResponse> = [];
-
+  @Output() productEvent = new EventEmitter<EventAction>();
+  @Output() deleteProductEvent = new EventEmitter<DeleteProductAction>();
+  private ref!: DynamicDialogRef;
   constructor(
     private productsService: ProductsService,
     private productsDtService: ProductsDataTransferService,
     private router: Router,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
@@ -36,6 +42,24 @@ export class ProductsHomeComponent implements OnInit, OnDestroy {
     } else this.getAPIProductsDatas();
   }
 
+  handleProductAction(event: EventAction): void {
+    if (event) {
+      this.ref = this.dialogService.open(ProductFormComponent, {
+        header: event?.action,
+        width: '70%',
+        contentStyle: { overflow: 'auto' },
+        baseZIndex: 10000,
+        maximizable: true,
+        data: {
+          event: event,
+          productDatas: this.productsDatas,
+        },
+      });
+      this.ref.onClose.pipe(takeUntil(this.destroy$)).subscribe({
+        next: () => this.getAPIProductsDatas(),
+      });
+    }
+  }
   getAPIProductsDatas() {
     this.productsService
       .getAllProducts()
@@ -59,9 +83,10 @@ export class ProductsHomeComponent implements OnInit, OnDestroy {
       });
   }
 
-  handleProductAction(event: EventAction): void {
-    if (event) {
-      console.log('DADOS DO EVENTO RECEBIDO', event);
+  handleProductEvent(action: string, id?: string): void {
+    if (action && action !== '') {
+      const productEventData = id && id !== '' ? { action, id } : { action };
+      this.productEvent.emit(productEventData);
     }
   }
 
