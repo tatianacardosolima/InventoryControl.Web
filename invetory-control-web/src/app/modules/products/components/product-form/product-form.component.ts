@@ -1,15 +1,15 @@
-
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { Subject, takeUntil } from 'rxjs';
+import { ProductEvent } from 'src/app/models/enums/ProductEvent';
 import { GetCategoriesResponse } from 'src/app/models/interfaces/categories/response/GetCategoriesResponse';
 import { EventAction } from 'src/app/models/interfaces/products/event/EventAction';
 import { CreateProductRequest } from 'src/app/models/interfaces/products/request/CreateProductRequest';
+import { EditProductRequest } from 'src/app/models/interfaces/products/request/EditProductRequest';
 import { GetAllProductsResponse } from 'src/app/models/interfaces/products/response/GetAllProductResponse';
-
 import { CategoriesService } from 'src/app/services/categories/categories.service';
 import { ProductsService } from 'src/app/services/products/products.service';
 import { ProductsDataTransferService } from 'src/app/shared/services/products-data-transfer.service';
@@ -38,10 +38,15 @@ export class ProductFormComponent implements OnInit, OnDestroy {
   });
   public editProductForm = this.formBuilder.group({
     name: ['', Validators.required],
-    price: ['', Validators.required],
+    price: [0, Validators.required],
     description: ['', Validators.required],
     amount: [0, Validators.required],
+
   });
+
+  public addProductAction = ProductEvent.ADD_PRODUCT_EVENT;
+  public editProductAction = ProductEvent.EDIT_PRODUCT_EVENT;
+  public saleProductAction = ProductEvent.SALE_PRODUCT_EVENT;
 
   constructor(
     private categoriesService: CategoriesService,
@@ -55,6 +60,17 @@ export class ProductFormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.productAction = this.ref.data;
+
+    if (
+      this.productAction?.event?.action === this.editProductAction &&
+      this.productAction?.productDatas
+    ) {
+      this.getProductSelectedDatas(this.productAction?.event?.id as string);
+    }
+
+    this.productAction?.event?.action === this.saleProductAction &&
+      this.getProductDatas();
+
     this.getAllCategories();
   }
 
@@ -111,8 +127,45 @@ export class ProductFormComponent implements OnInit, OnDestroy {
   }
 
   handleSubmitEditProduct(): void {
-    // if (this.editProductForm.value && this.editProductForm.valid) {
-    // }
+    if (
+      this.editProductForm.value &&
+      this.editProductForm.valid &&
+      this.productAction.event.id
+    ) {
+      const requestEditProduct: EditProductRequest = {
+        name: this.editProductForm.value.name as string,
+        price: this.editProductForm.value.price as number,
+        description: this.editProductForm.value.description as string,
+        product_id: this.productAction?.event?.id,
+        amount: this.editProductForm.value.amount as number
+
+      };
+
+      this.productsService
+        .editProduct(requestEditProduct)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Sucesso',
+              detail: 'Produto editado com sucesso!',
+              life: 2500,
+            });
+            this.editProductForm.reset();
+          },
+          error: (err) => {
+            console.log(err);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erro',
+              detail: 'Erro ao editar produto!',
+              life: 2500,
+            });
+            this.editProductForm.reset();
+          },
+        });
+    }
   }
 
   getProductSelectedDatas(productId: string): void {
@@ -128,7 +181,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
 
         this.editProductForm.setValue({
           name: this.productSelectedDatas?.name,
-          price: this.productSelectedDatas?.price.toString(),
+          price: this.productSelectedDatas?.price,
           amount: this.productSelectedDatas?.amount,
           description: this.productSelectedDatas?.description,
         });

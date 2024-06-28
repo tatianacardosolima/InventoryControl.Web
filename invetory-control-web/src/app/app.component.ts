@@ -9,8 +9,12 @@ import { PrimeNGConfig } from 'primeng/api';
 export class AppComponent {
   constructor(private primengConfig: PrimeNGConfig) {}
 
-  ngOnInit() {
-      this.primengConfig.ripple = true;
+  ngOnInit(): void {
+    this.primengConfig.ripple = true;
+    this.primengConfig.setTranslation({
+      apply: 'Aplicar',
+      clear: 'Limpar'
+    })
   }
   title = 'invetory-control-web';
 }

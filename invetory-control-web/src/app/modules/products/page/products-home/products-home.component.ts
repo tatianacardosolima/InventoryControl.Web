@@ -18,8 +18,8 @@ import { ProductFormComponent } from '../../components/product-form/product-form
 export class ProductsHomeComponent implements OnInit, OnDestroy {
   private readonly destroy$: Subject<void> = new Subject();
   public productsDatas: Array<GetAllProductsResponse> = [];
-  @Output() productEvent = new EventEmitter<EventAction>();
-  @Output() deleteProductEvent = new EventEmitter<DeleteProductAction>();
+ // @Output() productEvent = new EventEmitter<EventAction>();
+  //@Output() deleteProductEvent = new EventEmitter<DeleteProductAction>();
   private ref!: DynamicDialogRef;
   constructor(
     private productsService: ProductsService,
@@ -43,6 +43,8 @@ export class ProductsHomeComponent implements OnInit, OnDestroy {
   }
 
   handleProductAction(event: EventAction): void {
+    console.log('handleProductAction');
+    console.log(event);
     if (event) {
       this.ref = this.dialogService.open(ProductFormComponent, {
         header: event?.action,
@@ -83,12 +85,12 @@ export class ProductsHomeComponent implements OnInit, OnDestroy {
       });
   }
 
-  handleProductEvent(action: string, id?: string): void {
-    if (action && action !== '') {
-      const productEventData = id && id !== '' ? { action, id } : { action };
-      this.productEvent.emit(productEventData);
-    }
-  }
+  // handleProductEvent(action: string, id?: string): void {
+  //   if (action && action !== '') {
+  //     const productEventData = id && id !== '' ? { action, id } : { action };
+  //     this.productEvent.emit(productEventData);
+  //   }
+  // }
 
   handleDeleteProductAction(event: {
     product_id: string;

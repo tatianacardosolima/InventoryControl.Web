@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { CookieService } from 'ngx-cookie-service';
 import { Observable } from 'rxjs';
 import { GetCategoriesResponse } from 'src/app/models/interfaces/categories/response/GetCategoriesResponse';
+
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -20,10 +21,45 @@ export class CategoriesService {
 
   constructor(private http: HttpClient, private cookie: CookieService) {}
 
+  createNewCategory(requestDatas: {
+    name: string;
+  }): Observable<Array<GetCategoriesResponse>> {
+    return this.http.post<Array<GetCategoriesResponse>>(
+      `${this.API_URL}/category`,
+      requestDatas,
+      this.httpOptions
+    );
+  }
+
   getAllCategories(): Observable<Array<GetCategoriesResponse>> {
     return this.http.get<Array<GetCategoriesResponse>>(
       `${this.API_URL}/categories`,
       this.httpOptions
+    );
+  }
+
+  deleteCategory(requestDatas: { category_id: string }): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/category`, {
+      ...this.httpOptions,
+      params: {
+        category_id: requestDatas?.category_id,
+      },
+    });
+  }
+
+  editCategoryName(requestDatas: {
+    name: string;
+    category_id: string;
+  }): Observable<void> {
+    return this.http.put<void>(
+      `${this.API_URL}/category/edit`,
+      { name: requestDatas?.name },
+      {
+        ...this.httpOptions,
+        params: {
+          category_id: requestDatas?.category_id,
+        },
+      }
     );
   }
 }

@@ -22,6 +22,8 @@ export class ProductsTableComponent {
   handleProductEvent(action: string, id?: string): void {
     if (action && action !== '') {
       const productEventData = id && id !== '' ? { action, id } : { action };
+      console.log('productEventData');
+      console.log(productEventData);
       this.productEvent.emit(productEventData);
     }
   }

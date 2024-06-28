@@ -19,7 +19,7 @@ export class UserService {
   signupUser(requestDatas: SignupUserRequest): Observable<SignupUserResponse> {
     return this.http.post<SignupUserResponse>(
       `${this.API_URL}/user`,
-       '{"name":"dffad","email":"sadfds","password":"sadfd"}'
+      requestDatas
     );
   }
 
@@ -30,4 +30,6 @@ export class UserService {
     const JWT_TOKEN = this.cookie.get('USER_INFO');
     return JWT_TOKEN ? true : false;
   }
+
+
 }
